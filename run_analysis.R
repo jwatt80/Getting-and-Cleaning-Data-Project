@@ -34,5 +34,12 @@ train_merge <- data.frame("subject" = subject_train[,1],
 colnames(X_train) <- feat_list
 train_full <- cbind(train_merge, X_train)
 
-#merges test and training data sets
+### merges test and training data sets (Objective #1) ###
 full <- rbind(train_full, test_full)
+
+### selects only columns of measurement mean and standard deviations (Obj. 2) ###
+
+subset <- full[,grepl("mean()", names(full))|grepl("std()", names(full))]
+
+
+
