@@ -40,6 +40,16 @@ full <- rbind(train_full, test_full)
 ### selects only columns of measurement mean and standard deviations (Obj. 2) ###
 
 subset <- full[,grepl("mean()", names(full))|grepl("std()", names(full))]
+subj_activity <- rbind(train_merge, test_merge)
+subset2 <- cbind(subj_activity, subset)
+
+### adds a column of descriptive names to the activity code (Obj. 3) ###
+
+colnames(activity_labels) <- c("activities", "activity")
+subset3 <- left_join(subset2, activity_labels, by = "activities")
+subset3 <- relocate(subset3, activity, .after = activities)
+
+###
 
 
 
