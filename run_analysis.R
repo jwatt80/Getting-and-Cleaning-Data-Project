@@ -1,7 +1,10 @@
-packages <- c("dplyr", "plyr")
-install.packages(packages)
+install.packages("plyr")
+install.packages("dplyr")
+install.packages("reshape2")
+
 library(plyr)
 library(dplyr)
+library(reshape2)
 
 #imports activity labels and features .txt files
 activity_labels <- read.table("./UCI HAR Dataset/activity_labels.txt")
@@ -34,7 +37,7 @@ train_merge <- data.frame("subject" = subject_train[,1],
 colnames(X_train) <- feat_list
 train_full <- cbind(train_merge, X_train)
 
-### merges test and training data sets (Objective #1) ###
+### merges test and training data sets (Objective 1) ###
 full <- rbind(train_full, test_full)
 
 ### selects only columns of measurement mean and standard deviations (Obj. 2) ###
@@ -49,7 +52,15 @@ colnames(activity_labels) <- c("activities", "activity")
 subset3 <- left_join(subset2, activity_labels, by = "activities")
 subset3 <- relocate(subset3, activity, .after = activities)
 
-###
+### calculates means of each measurement by subject and activity (Obj. 5) ###
+
+subset6m <- melt(subset3, id.vars = c("subject", "activities", "activity"))
+subset6m <- group_by(subset6m, subject, activity, variable)
+
+mean_subset <- summarize(subset6m, mean(value)) #Long data set
+
+mean_subsetw <- dcast(mean_subset, subject + activity ~ variable, #Wide data set
+                      value.var = "mean(value)")
 
 
 
