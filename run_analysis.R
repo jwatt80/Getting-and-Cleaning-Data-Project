@@ -1,10 +1,12 @@
 install.packages("plyr")
 install.packages("dplyr")
 install.packages("reshape2")
+install.packages("magrittr")
 
 library(plyr)
 library(dplyr)
 library(reshape2)
+library(magrittr)
 
 #imports activity labels and features .txt files
 activity_labels <- read.table("./UCI HAR Dataset/activity_labels.txt")
@@ -52,6 +54,30 @@ colnames(activity_labels) <- c("activities", "activity")
 subset3 <- left_join(subset2, activity_labels, by = "activities")
 subset3 <- relocate(subset3, activity, .after = activities)
 
+### replaces variable names with descriptive names (Obj. 4) ###
+features <- names(subset3)
+featurestop <- features[1:3]
+featuresbot <- features[4:length(features)]
+featuresbot %<>%
+        gsub("Acc", "accelerometer ", .) %>%
+        gsub("Gyro", "gyroscope ", .) %>%
+        gsub("Jerk", "jerksignal ", .) %>% 
+        gsub("Mag", "magnitude ", .) %>%
+        gsub("^tBody", "time domain body ", .) %>%
+        gsub("^fBody", "frequency domain body ", .) %>%
+        gsub("Body", "", .) %>%
+        gsub("^tGravity", "time domain gravity ", .) %>%
+        gsub("-mean", "mean", .) %>%
+        gsub("-std", "std", .) %>%
+        gsub("\\()", "", .) %>%
+        gsub("\\-", " ", .) %>%
+        gsub("meanFreq", "mean frequency", .) %>%
+        tolower() %>%
+        paste("mean of", ., sep = " ")
+
+features <- c(featurestop, featuresbot)
+colnames(subset3) <- features
+
 ### calculates means of each measurement by subject and activity (Obj. 5) ###
 
 subset6m <- melt(subset3, id.vars = c("subject", "activities", "activity"))
@@ -62,5 +88,7 @@ mean_subset <- summarize(subset6m, mean(value)) #Long data set
 mean_subsetw <- dcast(mean_subset, subject + activity ~ variable, #Wide data set
                       value.var = "mean(value)")
 
+
+###important to note that the summarize function required a long data set (use melt)
 
 
